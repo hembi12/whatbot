@@ -16,7 +16,11 @@ class EmailService {
 
             return await emailConfig.sendEmail(mailOptions);
         } catch (error) {
-            console.error('❌ Error enviando confirmación al cliente:', error.message);
+            if (process.env.NODE_ENV === 'production') {
+                console.error('❌ Error enviando confirmación al cliente');
+            } else {
+                console.error('❌ Error enviando confirmación al cliente:', error.message);
+            }
             throw error;
         }
     }
@@ -40,7 +44,11 @@ class EmailService {
 
             return await emailConfig.sendEmail(mailOptions);
         } catch (error) {
-            console.error('❌ Error enviando notificación al equipo:', error.message);
+            if (process.env.NODE_ENV === 'production') {
+                console.error('❌ Error enviando notificación al equipo');
+            } else {
+                console.error('❌ Error enviando notificación al equipo:', error.message);
+            }
             throw error;
         }
     }
@@ -140,7 +148,7 @@ class EmailService {
                                 📱 WhatsApp: Responde a nuestro chat
                             </p>
                             <p style="color: #666; margin: 5px 0;">
-                                🌐 Web: <a href="https://www.martil.dev/" style="color: #25D366;">www.tuempresa.com</a>
+                                🌐 Web: <a href="https://tuempresa.com" style="color: #25D366;">www.tuempresa.com</a>
                             </p>
                         </div>
                     </div>

@@ -367,18 +367,25 @@ app.use((error, req, res, next) => {
 // ============================================
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
 
-app.listen(PORT, '127.0.0.1', () => {
+app.listen(PORT, HOST, () => {
     console.log('='.repeat(50));
     console.log('🚀 BOT DE WHATSAPP INICIADO');
     console.log('='.repeat(50));
     console.log(`📱 Servidor corriendo en puerto: ${PORT}`);
-    console.log(`🌐 Panel de administración: http://localhost:${PORT}`);
-    console.log(`🔗 Webhook disponible en: http://localhost:${PORT}/webhook`);
+    console.log(`🌐 Entorno: ${process.env.NODE_ENV || 'development'}`);
+    if (process.env.NODE_ENV === 'production') {
+        console.log(`🌍 Disponible en: https://${process.env.RAILWAY_STATIC_URL || 'tu-dominio.com'}`);
+    } else {
+        console.log(`🔗 Panel local: http://localhost:${PORT}`);
+        console.log(`🔗 Webhook local: http://localhost:${PORT}/webhook`);
+    }
     console.log('='.repeat(50));
     console.log('📊 Funcionalidades disponibles:');
     console.log('   ✅ Sistema de cotizaciones');
     console.log('   ✅ Base de datos SQLite');
+    console.log('   ✅ Sistema de emails');
     console.log('   ✅ Panel de administración');
     console.log('   ✅ Exportación de datos');
     console.log('   ✅ Gestión de sesiones');

@@ -9,7 +9,9 @@ const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
 // Verificar que las variables de entorno estén configuradas
 if (!accountSid || !authToken || !phoneNumber) {
     console.error('❌ Error: Variables de entorno de Twilio no configuradas');
-    console.error('Verifica que tengas TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_PHONE_NUMBER en tu .env');
+    if (process.env.NODE_ENV !== 'production') {
+        console.error('Verifica que tengas TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_PHONE_NUMBER en tu .env');
+    }
     process.exit(1);
 }
 
@@ -25,7 +27,11 @@ async function sendMessage(to, message) {
             to: to
         });
         
-        console.log(`✅ Mensaje enviado a ${to} - SID: ${result.sid}`);
+        if (process.env.NODE_ENV === 'production') {
+            console.log(`✅ Mensaje enviado - SID: ${result.sid}`);
+        } else {
+            console.log(`✅ Mensaje enviado a ${to} - SID: ${result.sid}`);
+        }
         return result;
     } catch (error) {
         console.error('❌ Error enviando mensaje:', error.message);

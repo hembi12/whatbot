@@ -12,7 +12,9 @@ class WebhookController {
             const session = sessionService.getUserSession(from);
             
             console.log(`📨 Mensaje recibido de ${from}: ${req.body.Body}`);
-            console.log(`📍 Estado actual: ${session.step}`);
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(`📍 Estado actual: ${session.step}`);
+            }
             
             // Actualizar actividad de sesión
             sessionService.updateSessionActivity(from);
@@ -33,6 +35,16 @@ class WebhookController {
             
         } catch (error) {
             console.error('❌ Error en webhook:', error.message);
+            
+            // En producción, intentar responder al usuario antes de fallar
+            if (process.env.NODE_ENV === 'production') {
+                try {
+                    await sendMessage(req.body.From, 'Lo siento, ha ocurrido un error temporal. Por favor, intenta nuevamente en unos momentos.');
+                } catch (sendError) {
+                    console.error('❌ Error enviando mensaje de error:', sendError.message);
+                }
+            }
+            
             res.status(500).send('Error interno del servidor');
         }
     }
@@ -227,7 +239,13 @@ class WebhookController {
                 );
                 
             } catch (error) {
-                console.error('❌ Error guardando cotización:', error);
+                console.error('❌ Error guardando cotización:', error.message);
+                
+                // En producción, limpiar sesión si hay error
+                if (process.env.NODE_ENV === 'production') {
+                    sessionService.updateUserSession(from, { step: 'initial', data: {} });
+                }
+                
                 return ResponseGenerator.getQuotationErrorMessage();
             }
         } else if (message === '2') {

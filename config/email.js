@@ -60,8 +60,12 @@ class EmailConfig {
             await this.transporter.verify();
             console.log('✅ Configuración de email verificada correctamente');
         } catch (error) {
-            console.error('❌ Error en configuración de email:', error.message);
-            console.error('💡 Verifica tus credenciales en el archivo .env');
+            if (process.env.NODE_ENV === 'production') {
+                console.error('❌ Error en configuración de email');
+            } else {
+                console.error('❌ Error en configuración de email:', error.message);
+                console.error('💡 Verifica tus credenciales en el archivo .env');
+            }
         }
     }
 

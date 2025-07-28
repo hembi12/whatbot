@@ -23,14 +23,18 @@ class SessionService {
         Object.assign(session, updates);
         this.userSessions.set(phoneNumber, session);
         
-        console.log(`📝 Sesión actualizada para ${phoneNumber}: ${JSON.stringify(updates)}`);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`📝 Sesión actualizada para ${phoneNumber}: ${JSON.stringify(updates)}`);
+        }
         return session;
     }
 
     // Limpiar sesión
     clearUserSession(phoneNumber) {
         this.userSessions.delete(phoneNumber);
-        console.log(`🗑️ Sesión limpiada para ${phoneNumber}`);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`🗑️ Sesión limpiada para ${phoneNumber}`);
+        }
     }
 
     // Reiniciar datos de sesión manteniendo el step
@@ -40,7 +44,9 @@ class SessionService {
         session.selectedService = null;
         this.userSessions.set(phoneNumber, session);
         
-        console.log(`🔄 Datos de sesión reiniciados para ${phoneNumber}`);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`🔄 Datos de sesión reiniciados para ${phoneNumber}`);
+        }
         return session;
     }
 

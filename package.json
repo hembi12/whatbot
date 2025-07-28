@@ -9,7 +9,12 @@
     "build": "echo 'No build step required'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["whatsapp", "bot", "cotizaciones", "twilio"],
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "cotizaciones",
+    "twilio"
+  ],
   "author": "Héctor Martil",
   "license": "ISC",
   "type": "commonjs",
@@ -22,6 +27,7 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "nodemailer": "^7.0.5",
+    "pg": "^8.16.3",
     "sqlite3": "^5.1.7",
     "twilio": "^5.8.0"
   },

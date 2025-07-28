@@ -65,7 +65,7 @@ class ResponseGenerator {
         return "📞 CONTACTO:\n\n" +
                "📧 Email: info@tuempresa.com\n" +
                "📱 WhatsApp: Este chat\n" +
-               "🌐 Web: https://www.martil.dev/\n\n" +
+               "🌐 Web: www.tuempresa.com\n\n" +
                "Escribe \"cotizar\" para solicitar una cotización";
     }
 
@@ -73,7 +73,7 @@ class ResponseGenerator {
     static getPortfolioInfo() {
         return "🎨 PORTAFOLIO:\n\n" +
                "Visita nuestros trabajos anteriores:\n" +
-               "👉 www.tuempresa.com/portafolio\n\n" +
+               `👉 ${process.env.COMPANY_WEBSITE || 'www.tuempresa.com'}/portafolio\n\n` +
                "O escribe \"cotizar\" para tu proyecto";
     }
 
@@ -134,8 +134,8 @@ class ResponseGenerator {
                `📋 Número de cotización: #${quotationId}\n` +
                `Te contactaremos en menos de 24 horas al email: ${email}\n\n` +
                "🚀 Mientras tanto:\n" +
-               "• Revisa nuestro portafolio: www.tuempresa.com/portafolio\n" +
-               "• Síguenos en redes: @tuempresa\n\n" +
+               `• Revisa nuestro portafolio: ${process.env.COMPANY_WEBSITE || 'www.tuempresa.com'}/portafolio\n` +
+               `• Síguenos en redes: @${process.env.COMPANY_SOCIAL || 'tuempresa'}\n\n` +
                "¿Qué te gustaría hacer ahora?\n" +
                "1️⃣ Solicitar otra cotización\n" +
                "2️⃣ Finalizar conversación";
@@ -147,7 +147,7 @@ class ResponseGenerator {
                "Ha sido un placer ayudarte con tu proyecto web. " +
                "Nuestro equipo revisará tu solicitud y te contactaremos pronto.\n\n" +
                "💼 Si tienes alguna pregunta urgente:\n" +
-               "📧 Email: info@tuempresa.com\n" +
+               `📧 Email: ${process.env.EMAIL_FROM || 'info@tuempresa.com'}\n` +
                "📱 WhatsApp: Siempre disponible aquí\n\n" +
                "¡Que tengas un excelente día! ✨\n\n" +
                "---\n" +
@@ -159,7 +159,7 @@ class ResponseGenerator {
         return "¡Gracias por usar nuestro servicio de cotizaciones! 🙏\n\n" +
                "Esperamos poder ayudarte pronto con tu proyecto web.\n\n" +
                "📞 Recuerda que siempre puedes contactarnos:\n" +
-               "📧 Email: info@tuempresa.com\n" +
+               `📧 Email: ${process.env.EMAIL_FROM || 'info@tuempresa.com'}\n` +
                "📱 WhatsApp: Aquí mismo\n\n" +
                "¡Hasta pronto! ✨\n\n" +
                "---\n" +
@@ -170,7 +170,7 @@ class ResponseGenerator {
     static getQuotationErrorMessage() {
         return "⚠️ Hubo un problema al procesar tu cotización. " +
                "Por favor, intenta nuevamente o contáctanos directamente.\n\n" +
-               "📧 Email: info@tuempresa.com";
+               `📧 Email: ${process.env.EMAIL_FROM || 'info@tuempresa.com'}`;
     }
 
     // Mensaje por defecto

@@ -60,7 +60,11 @@ class QuotationService {
                 });
                 
             } catch (emailError) {
-                console.error('⚠️ Error enviando emails (cotización guardada):', emailError.message);
+                if (process.env.NODE_ENV === 'production') {
+                    console.error('⚠️ Error enviando emails (cotización guardada)');
+                } else {
+                    console.error('⚠️ Error enviando emails (cotización guardada):', emailError.message);
+                }
                 // No fallar la cotización si hay error en emails
             }
 
@@ -68,7 +72,11 @@ class QuotationService {
             return savedQuotation;
 
         } catch (error) {
-            console.error('❌ Error creando cotización:', error.message);
+            if (process.env.NODE_ENV === 'production') {
+                console.error('❌ Error creando cotización');
+            } else {
+                console.error('❌ Error creando cotización:', error.message);
+            }
             throw error;
         }
     }

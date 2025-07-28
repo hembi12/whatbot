@@ -153,7 +153,12 @@ class AdminController {
             
             res.send(html);
         } catch (error) {
-            res.status(500).send('Error obteniendo cotizaciones: ' + error.message);
+            console.error('❌ Error obteniendo cotizaciones:', error.message);
+            if (process.env.NODE_ENV === 'production') {
+                res.status(500).send('Error interno del servidor');
+            } else {
+                res.status(500).send('Error obteniendo cotizaciones: ' + error.message);
+            }
         }
     }
     
@@ -260,7 +265,12 @@ class AdminController {
             
             res.send(html);
         } catch (error) {
-            res.status(500).send('Error obteniendo estadísticas: ' + error.message);
+            console.error('❌ Error obteniendo estadísticas:', error.message);
+            if (process.env.NODE_ENV === 'production') {
+                res.status(500).send('Error interno del servidor');
+            } else {
+                res.status(500).send('Error obteniendo estadísticas: ' + error.message);
+            }
         }
     }
     
