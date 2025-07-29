@@ -25,7 +25,7 @@ twilioVars.forEach(key => {
 // Configuración de Twilio
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
+const phoneNumber = process.env.TWILIO_WHATSAPP_NUMBER;
 
 console.log('📊 Valores finales:');
 console.log('accountSid:', accountSid ? `${accountSid.substring(0, 10)}...` : 'UNDEFINED');
@@ -36,7 +36,7 @@ console.log('phoneNumber:', phoneNumber || 'UNDEFINED');
 if (!accountSid || !authToken || !phoneNumber) {
     console.error('❌ Error: Variables de entorno de Twilio no configuradas');
     if (process.env.NODE_ENV !== 'production') {
-        console.error('Verifica que tengas TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_PHONE_NUMBER en tu .env');
+        console.error('Verifica que tengas TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_WHATSAPP_NUMBER en tu .env');
     }
     process.exit(1);
 }
