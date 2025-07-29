@@ -5,18 +5,25 @@ if (process.env.NODE_ENV !== 'production') {
 
 const twilio = require('twilio');
 
+// DEBUGGING COMPLETO - Temporal para diagnóstico
+console.log('🔍 DEBUGGING COMPLETO:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('Todas las variables que empiezan con TWILIO:');
+Object.keys(process.env).forEach(key => {
+    if (key.includes('TWILIO')) {
+        console.log(`${key}:`, process.env[key] ? 'CONFIGURADO' : 'NO CONFIGURADO');
+    }
+});
+
 // Configuración de Twilio
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
-// Debugging en desarrollo
-if (process.env.NODE_ENV !== 'production') {
-    console.log('🔍 Debug Twilio variables:');
-    console.log('TWILIO_ACCOUNT_SID:', accountSid ? 'Configurado' : 'NO CONFIGURADO');
-    console.log('TWILIO_AUTH_TOKEN:', authToken ? 'Configurado' : 'NO CONFIGURADO');
-    console.log('TWILIO_PHONE_NUMBER:', phoneNumber ? 'Configurado' : 'NO CONFIGURADO');
-}
+console.log('📊 Valores finales:');
+console.log('accountSid:', accountSid ? `${accountSid.substring(0, 10)}...` : 'UNDEFINED');
+console.log('authToken:', authToken ? `${authToken.substring(0, 10)}...` : 'UNDEFINED');
+console.log('phoneNumber:', phoneNumber || 'UNDEFINED');
 
 // Verificar que las variables de entorno estén configuradas
 if (!accountSid || !authToken || !phoneNumber) {
