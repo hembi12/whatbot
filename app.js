@@ -35,11 +35,30 @@ app.get('/', adminController.getHomePage);
 // ============================================
 
 // Webhook principal para recibir mensajes de WhatsApp
-app.post('/webhook', webhookController.handleIncomingMessage);
+// app.post('/webhook', webhookController.handleIncomingMessage);
 
-// Verificación del webhook (requerido por algunos servicios)
-app.get('/webhook', (req, res) => {
-    res.send('Webhook de WhatsApp funcionando correctamente ✅');
+// Test básico del webhook
+app.post('/webhook', (req, res) => {
+    console.log('🔥 WEBHOOK BÁSICO FUNCIONANDO');
+    console.log('📦 Body recibido:', req.body);
+    console.log('📦 Headers:', req.headers);
+    
+    try {
+        res.status(200).json({ 
+            status: 'success', 
+            message: 'Webhook funcionando',
+            body: req.body 
+        });
+    } catch (error) {
+        console.error('❌ Error en webhook básico:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Endpoint de test adicional
+app.get('/test', (req, res) => {
+    console.log('🧪 Test endpoint funcionando');
+    res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 // ============================================
