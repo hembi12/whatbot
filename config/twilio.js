@@ -8,11 +8,18 @@ const twilio = require('twilio');
 // DEBUGGING COMPLETO - Temporal para diagnóstico
 console.log('🔍 DEBUGGING COMPLETO:');
 console.log('NODE_ENV:', process.env.NODE_ENV);
+
+if (process.env.DEBUG_ALL_VARS) {
+    console.log('🔍 TODAS las variables de entorno disponibles:');
+    console.log(Object.keys(process.env).sort());
+}
+
 console.log('Todas las variables que empiezan con TWILIO:');
-Object.keys(process.env).forEach(key => {
-    if (key.includes('TWILIO')) {
-        console.log(`${key}:`, process.env[key] ? 'CONFIGURADO' : 'NO CONFIGURADO');
-    }
+const twilioVars = Object.keys(process.env).filter(key => key.includes('TWILIO'));
+console.log('Variables encontradas:', twilioVars);
+
+twilioVars.forEach(key => {
+    console.log(`${key}:`, process.env[key] ? 'CONFIGURADO' : 'NO CONFIGURADO');
 });
 
 // Configuración de Twilio
