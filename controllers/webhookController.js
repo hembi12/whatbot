@@ -6,6 +6,9 @@ const ResponseGenerator = require('../utils/responses');
 class WebhookController {
     
     async handleIncomingMessage(req, res) {
+        console.log('🔥 WEBHOOK EJECUTÁNDOSE - Inicio');
+        console.log('📦 req.body:', req.body);
+        
         try {
             const incomingMessage = req.body.Body.toLowerCase().trim();
             const from = req.body.From;
@@ -31,10 +34,13 @@ class WebhookController {
             
             // Enviar respuesta
             await sendMessage(from, responseMessage);
+            console.log('✅ Respuesta enviada exitosamente');
+            
             res.status(200).send('OK');
             
         } catch (error) {
             console.error('❌ Error en webhook:', error.message);
+            console.error('❌ Stack trace:', error.stack);
             
             // En producción, intentar responder al usuario antes de fallar
             if (process.env.NODE_ENV === 'production') {
@@ -277,9 +283,10 @@ class WebhookController {
     }
 }
 
+// Crear una instancia del controlador
+const controller = new WebhookController();
+
+// Exportar el método correctamente vinculado
 module.exports = {
-    handleIncomingMessage: async (req, res) => {
-        const controller = new WebhookController();
-        return controller.handleIncomingMessage(req, res);
-    }
+    handleIncomingMessage: controller.handleIncomingMessage.bind(controller)
 };
