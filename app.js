@@ -30,35 +30,26 @@ app.use((req, res, next) => {
 // Página principal
 app.get('/', adminController.getHomePage);
 
+// Endpoint de test
+app.get('/test', (req, res) => {
+    console.log('🧪 Test endpoint funcionando');
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
 // ============================================
 // RUTAS DEL WEBHOOK (WhatsApp)
 // ============================================
 
 // Webhook principal para recibir mensajes de WhatsApp
-// app.post('/webhook', webhookController.handleIncomingMessage);
+app.post('/webhook', webhookController.handleIncomingMessage);
 
-// Test básico del webhook
-app.post('/webhook', (req, res) => {
-    console.log('🔥 WEBHOOK BÁSICO FUNCIONANDO');
-    console.log('📦 Body recibido:', req.body);
-    console.log('📦 Headers:', req.headers);
-    
-    try {
-        res.status(200).json({ 
-            status: 'success', 
-            message: 'Webhook funcionando',
-            body: req.body 
-        });
-    } catch (error) {
-        console.error('❌ Error en webhook básico:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Endpoint de test adicional
-app.get('/test', (req, res) => {
-    console.log('🧪 Test endpoint funcionando');
-    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+// Verificación del webhook (requerido por algunos servicios)
+app.get('/webhook', (req, res) => {
+    res.send('Webhook de WhatsApp funcionando correctamente ✅');
 });
 
 // ============================================
@@ -390,16 +381,18 @@ app.use((error, req, res, next) => {
 // ============================================
 
 const PORT = process.env.PORT || 3000;
-const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
 
-app.listen(PORT, HOST, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log('='.repeat(50));
     console.log('🚀 BOT DE WHATSAPP INICIADO');
     console.log('='.repeat(50));
     console.log(`📱 Servidor corriendo en puerto: ${PORT}`);
     console.log(`🌐 Entorno: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🌍 Host: 0.0.0.0 (accesible externamente)`);
+    
     if (process.env.NODE_ENV === 'production') {
-        console.log(`🌍 Disponible en: https://${process.env.RAILWAY_STATIC_URL || 'tu-dominio.com'}`);
+        console.log(`🔗 URL pública: https://${process.env.RAILWAY_STATIC_URL || 'whatbot-production-2ef9.up.railway.app'}`);
+        console.log(`🔗 Webhook URL: https://${process.env.RAILWAY_STATIC_URL || 'whatbot-production-2ef9.up.railway.app'}/webhook`);
     } else {
         console.log(`🔗 Panel local: http://localhost:${PORT}`);
         console.log(`🔗 Webhook local: http://localhost:${PORT}/webhook`);
@@ -407,7 +400,7 @@ app.listen(PORT, HOST, () => {
     console.log('='.repeat(50));
     console.log('📊 Funcionalidades disponibles:');
     console.log('   ✅ Sistema de cotizaciones');
-    console.log('   ✅ Base de datos SQLite');
+    console.log('   ✅ Base de datos PostgreSQL');
     console.log('   ✅ Sistema de emails');
     console.log('   ✅ Panel de administración');
     console.log('   ✅ Exportación de datos');
@@ -416,7 +409,11 @@ app.listen(PORT, HOST, () => {
     
     // Limpiar sesiones antiguas cada hora
     setInterval(() => {
-        const sessionService = require('./services/sessionService');
-        sessionService.cleanOldSessions(24); // Limpiar sesiones de más de 24 horas
+        try {
+            const sessionService = require('./services/sessionService');
+            sessionService.cleanOldSessions(24); // Limpiar sesiones de más de 24 horas
+        } catch (error) {
+            console.error('❌ Error limpiando sesiones:', error.message);
+        }
     }, 60 * 60 * 1000); // Cada hora
 });
