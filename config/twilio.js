@@ -27,16 +27,20 @@ const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const phoneNumber = process.env.TWILIO_WHATSAPP_NUMBER;
 
+// ID del Messaging Service
+const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+
 console.log('📊 Valores finales:');
 console.log('accountSid:', accountSid ? `${accountSid.substring(0, 10)}...` : 'UNDEFINED');
 console.log('authToken:', authToken ? `${authToken.substring(0, 10)}...` : 'UNDEFINED');
 console.log('phoneNumber:', phoneNumber || 'UNDEFINED');
+console.log('messagingServiceSid:', messagingServiceSid || 'UNDEFINED');
 
 // Verificar que las variables de entorno estén configuradas
-if (!accountSid || !authToken || !phoneNumber) {
+if (!accountSid || !authToken || !messagingServiceSid) {
     console.error('❌ Error: Variables de entorno de Twilio no configuradas');
     if (process.env.NODE_ENV !== 'production') {
-        console.error('Verifica que tengas TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_WHATSAPP_NUMBER en tu .env');
+        console.error('Verifica que tengas TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_MESSAGING_SERVICE_SID en tu .env');
     }
     process.exit(1);
 }
@@ -44,12 +48,12 @@ if (!accountSid || !authToken || !phoneNumber) {
 // Crear cliente de Twilio
 const client = twilio(accountSid, authToken);
 
-// Función para enviar mensaje
+// Función para enviar mensaje usando Messaging Service
 async function sendMessage(to, message) {
     try {
         const result = await client.messages.create({
             body: message,
-            from: phoneNumber,
+            messagingServiceSid: messagingServiceSid, // Usar Messaging Service en lugar de 'from'
             to: to
         });
         
@@ -57,10 +61,30 @@ async function sendMessage(to, message) {
             console.log(`✅ Mensaje enviado - SID: ${result.sid}`);
         } else {
             console.log(`✅ Mensaje enviado a ${to} - SID: ${result.sid}`);
+            console.log(`📤 Via Messaging Service: ${messagingServiceSid}`);
         }
         return result;
     } catch (error) {
         console.error('❌ Error enviando mensaje:', error.message);
+        console.error('❌ Error code:', error.code);
+        console.error('❌ More info:', error.moreInfo);
+        throw error;
+    }
+}
+
+// Función alternativa usando el número directo (fallback)
+async function sendMessageDirect(to, message) {
+    try {
+        const result = await client.messages.create({
+            body: message,
+            from: phoneNumber,
+            to: to
+        });
+        
+        console.log(`✅ Mensaje enviado directo a ${to} - SID: ${result.sid}`);
+        return result;
+    } catch (error) {
+        console.error('❌ Error enviando mensaje directo:', error.message);
         throw error;
     }
 }
@@ -81,6 +105,8 @@ function validateWebhook(req) {
 module.exports = {
     client,
     sendMessage,
+    sendMessageDirect,
     validateWebhook,
-    phoneNumber
+    phoneNumber,
+    messagingServiceSid
 };
