@@ -1,10 +1,22 @@
-require('dotenv').config();
+// Solo cargar dotenv en desarrollo
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 const twilio = require('twilio');
 
 // Configuración de Twilio
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+// Debugging en desarrollo
+if (process.env.NODE_ENV !== 'production') {
+    console.log('🔍 Debug Twilio variables:');
+    console.log('TWILIO_ACCOUNT_SID:', accountSid ? 'Configurado' : 'NO CONFIGURADO');
+    console.log('TWILIO_AUTH_TOKEN:', authToken ? 'Configurado' : 'NO CONFIGURADO');
+    console.log('TWILIO_PHONE_NUMBER:', phoneNumber ? 'Configurado' : 'NO CONFIGURADO');
+}
 
 // Verificar que las variables de entorno estén configuradas
 if (!accountSid || !authToken || !phoneNumber) {

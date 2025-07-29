@@ -1,4 +1,8 @@
-require('dotenv').config();
+// Solo cargar dotenv en desarrollo
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 const express = require('express');
 const bodyParser = require('body-parser');
 
