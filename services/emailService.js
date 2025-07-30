@@ -272,7 +272,7 @@ class EmailService {
                         
                         <!-- Panel Link -->
                         <div style="text-align: center; margin: 30px 0;">
-                            <a href="${process.env.PANEL_URL || 'http://localhost:3000'}/admin/quotation/${quotation.id}" 
+                            <a href="${process.env.PANEL_URL || 'https://whatbot-production-2ef9.up.railway.app'}/admin/quotation/${quotation.id}" 
                                style="display: inline-block; background: #dc3545; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
                                 👀 Ver en Panel de Admin
                             </a>
