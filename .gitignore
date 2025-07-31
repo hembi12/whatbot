@@ -49,3 +49,6 @@ pids
 
 # Railway
 .railway/
+
+# EJS cache (opcional)
+.ejs-cache

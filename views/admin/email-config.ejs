@@ -1,0 +1,51 @@
+<h1>📧 Configuración de Email</h1>
+
+<div class="status <%= config.isConfigured ? 'ok' : 'error' %>">
+    <%= config.isConfigured ? 
+        '✅ Sistema de email configurado correctamente' : 
+        '❌ Sistema de email no configurado - Revisa tu archivo .env' 
+    %>
+</div>
+
+<div class="config-grid">
+    <div class="config-item">
+        <h3>📨 Proveedor</h3>
+        <p><%= config.provider || 'No configurado' %></p>
+    </div>
+    
+    <div class="config-item">
+        <h3>📧 Email de envío</h3>
+        <p><%= config.fromEmail || 'No configurado' %></p>
+    </div>
+    
+    <div class="config-item">
+        <h3>🏢 Nombre de empresa</h3>
+        <p><%= config.companyName || 'No configurado' %></p>
+    </div>
+    
+    <div class="config-item">
+        <h3>👥 Email del equipo</h3>
+        <p><%= config.teamEmail || 'No configurado' %></p>
+    </div>
+</div>
+
+<% if (config.isConfigured) { %>
+    <div class="test-form">
+        <h3>🧪 Probar Envío de Emails</h3>
+        <form action="/admin/test-email" method="POST">
+            <input type="email" name="testEmail" placeholder="Email de prueba" required>
+            <button type="submit">Enviar Email de Prueba</button>
+        </form>
+    </div>
+<% } else { %>
+    <div class="status error">
+        <h3>🔧 Para configurar emails:</h3>
+        <ol>
+            <li>Abre tu archivo .env</li>
+            <li>Configura EMAIL_FROM con tu email</li>
+            <li>Configura EMAIL_PASSWORD con tu contraseña de aplicación</li>
+            <li>Opcionalmente configura EMAIL_TO_TEAM</li>
+            <li>Reinicia el servidor</li>
+        </ol>
+    </div>
+<% } %>

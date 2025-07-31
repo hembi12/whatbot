@@ -1,0 +1,44 @@
+<h1>📊 Estadísticas del Bot</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>📈 Total Cotizaciones</h3>
+        <div class="stat-number"><%= stats.totalQuotations[0].count %></div>
+    </div>
+    
+    <div class="stat-card">
+        <h3>👥 Sesiones Activas</h3>
+        <div class="stat-number"><%= sessionStats.totalSessions %></div>
+    </div>
+</div>
+
+<div class="stat-list">
+    <h2>🏷️ Cotizaciones por Servicio</h2>
+    <ul>
+        <% stats.quotationsByService.forEach(item => { %>
+            <li><strong><%= item.service_name %>:</strong> <%= item.count %> cotizaciones</li>
+        <% }); %>
+    </ul>
+</div>
+
+<div class="stat-list">
+    <h2>📋 Estados de Cotizaciones</h2>
+    <ul>
+        <% stats.quotationsByStatus.forEach(item => { %>
+            <li><strong><%= statusNames[item.status] || item.status %>:</strong> <%= item.count %> cotizaciones</li>
+        <% }); %>
+    </ul>
+</div>
+
+<div class="stat-list">
+    <h2>🕒 Cotizaciones Recientes</h2>
+    <ul>
+        <% stats.recentQuotations.forEach(q => { %>
+            <% const date = new Date(q.created_at).toLocaleDateString('es-ES'); %>
+            <li>
+                <strong>#<%= q.id %></strong> - <%= q.client_name || 'Anónimo' %> 
+                (<%= q.service_name %>) - <%= date %>
+            </li>
+        <% }); %>
+    </ul>
+</div>

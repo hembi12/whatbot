@@ -7,11 +7,22 @@ class WebhookController {
     
     async handleIncomingMessage(req, res) {
         console.log('🔥 WEBHOOK EJECUTÁNDOSE - Inicio');
-        console.log('📦 req.body:', req.body);
+        
+        // Logging condicional en desarrollo
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('📦 req.body:', req.body);
+        }
         
         try {
-            const incomingMessage = req.body.Body.toLowerCase().trim();
+            const incomingMessage = req.body.Body?.toLowerCase().trim() || '';
             const from = req.body.From;
+            
+            // Validar datos de entrada
+            if (!from || !req.body.Body) {
+                console.error('❌ Datos de entrada inválidos');
+                return res.status(400).send('Datos inválidos');
+            }
+            
             const session = sessionService.getUserSession(from);
             
             console.log(`📨 Mensaje recibido de ${from}: ${req.body.Body}`);
@@ -40,7 +51,9 @@ class WebhookController {
             
         } catch (error) {
             console.error('❌ Error en webhook:', error.message);
-            console.error('❌ Stack trace:', error.stack);
+            if (process.env.NODE_ENV !== 'production') {
+                console.error('❌ Stack trace:', error.stack);
+            }
             
             // En producción, intentar responder al usuario antes de fallar
             if (process.env.NODE_ENV === 'production') {
@@ -57,71 +70,62 @@ class WebhookController {
     
     // Manejar comandos globales
     async handleGlobalCommands(message, from) {
-        switch (message) {
-            case 'menu':
-            case 'inicio':
+        const commands = {
+            'menu': () => {
                 sessionService.updateUserSession(from, { step: 'main_menu' });
                 return ResponseGenerator.getMainMenu();
-                
-            case 'salir':
-            case 'cerrar':
-            case 'bye':
-            case 'adios':
+            },
+            'inicio': () => {
+                sessionService.updateUserSession(from, { step: 'main_menu' });
+                return ResponseGenerator.getMainMenu();
+            },
+            'salir': () => {
                 sessionService.clearUserSession(from);
                 return ResponseGenerator.getExitMessage();
-                
-            case 'precios':
-                return ResponseGenerator.getPricesTable();
-                
-            case 'contacto':
-                return ResponseGenerator.getContactInfo();
-                
-            case 'portafolio':
-                return ResponseGenerator.getPortfolioInfo();
-                
-            default:
-                return null; // No es comando global
-        }
+            },
+            'cerrar': () => {
+                sessionService.clearUserSession(from);
+                return ResponseGenerator.getExitMessage();
+            },
+            'bye': () => {
+                sessionService.clearUserSession(from);
+                return ResponseGenerator.getExitMessage();
+            },
+            'adios': () => {
+                sessionService.clearUserSession(from);
+                return ResponseGenerator.getExitMessage();
+            },
+            'precios': () => ResponseGenerator.getPricesTable(),
+            'contacto': () => ResponseGenerator.getContactInfo(),
+            'portafolio': () => ResponseGenerator.getPortfolioInfo()
+        };
+        
+        return commands[message] ? commands[message]() : null;
     }
     
     // Manejar flujo principal
     async handleMainFlow(message, from, messageBody) {
         const session = sessionService.getUserSession(from);
         
-        switch (session.step) {
-            case 'initial':
-                return this.handleInitialStep(message, from);
-                
-            case 'main_menu':
-                return this.handleMainMenuStep(message, from);
-                
-            case 'service_details':
-                return this.handleServiceDetailsStep(message, from);
-                
-            case 'quote_name':
-                return this.handleQuoteNameStep(messageBody.Body, from);
-                
-            case 'quote_company':
-                return this.handleQuoteCompanyStep(messageBody.Body, from);
-                
-            case 'quote_email':
-                return this.handleQuoteEmailStep(messageBody.Body, from);
-                
-            case 'quote_phone':
-                return this.handleQuotePhoneStep(messageBody.Body, from);
-                
-            case 'quote_description':
-                return this.handleQuoteDescriptionStep(messageBody.Body, from);
-                
-            case 'quote_summary':
-                return await this.handleQuoteSummaryStep(message, from);
-                
-            case 'quote_sent':
-                return this.handleQuoteSentStep(message, from);
-                
-            default:
-                sessionService.updateUserSession(from, { step: 'initial' });
-                return ResponseGenerator.getDefaultMessage();
+        const flowHandlers = {
+            'initial': () => this.handleInitialStep(message, from),
+            'main_menu': () => this.handleMainMenuStep(message, from),
+            'service_details': () => this.handleServiceDetailsStep(message, from),
+            'quote_name': () => this.handleQuoteNameStep(messageBody.Body, from),
+            'quote_company': () => this.handleQuoteCompanyStep(messageBody.Body, from),
+            'quote_email': () => this.handleQuoteEmailStep(messageBody.Body, from),
+            'quote_phone': () => this.handleQuotePhoneStep(messageBody.Body, from),
+            'quote_description': () => this.handleQuoteDescriptionStep(messageBody.Body, from),
+            'quote_summary': () => this.handleQuoteSummaryStep(message, from),
+            'quote_sent': () => this.handleQuoteSentStep(message, from)
+        };
+        
+        if (flowHandlers[session.step]) {
+            return await flowHandlers[session.step]();
+        } else {
+            // Reset si step desconocido
+            sessionService.updateUserSession(from, { step: 'initial' });
+            return ResponseGenerator.getDefaultMessage();
         }
     }
     
@@ -149,8 +153,7 @@ class WebhookController {
             });
             return ResponseGenerator.getServiceDetails(serviceId);
         } else {
-            return ResponseGenerator.getInvalidOptionMessage("(1-6)") + 
-                   "\n\n" + ResponseGenerator.getMainMenu();
+            return this.getInvalidOptionResponse("(1-6)", ResponseGenerator.getMainMenu());
         }
     }
     
@@ -158,22 +161,26 @@ class WebhookController {
     handleServiceDetailsStep(message, from) {
         const session = sessionService.getUserSession(from);
         
-        if (message === '1') {
-            sessionService.updateUserSession(from, { step: 'quote_name' });
-            return "¡Perfecto! Necesito algunos datos para tu cotización:\n\n👤 ¿Cuál es tu nombre?";
-        } else if (message === '2') {
-            sessionService.updateUserSession(from, { step: 'main_menu' });
-            return ResponseGenerator.getMainMenu();
-        } else if (message === '3') {
-            return ResponseGenerator.getServiceMoreInfo(session.selectedService);
-        } else {
-            return ResponseGenerator.getInvalidOptionMessage("1️⃣, 2️⃣ o 3️⃣") + 
-                   "\n\n1️⃣ Sí, solicitar cotización\n2️⃣ Ver otro servicio\n3️⃣ Más información";
+        switch (message) {
+            case '1':
+                sessionService.updateUserSession(from, { step: 'quote_name' });
+                return "¡Perfecto! Necesito algunos datos para tu cotización:\n\n👤 ¿Cuál es tu nombre?";
+            case '2':
+                sessionService.updateUserSession(from, { step: 'main_menu' });
+                return ResponseGenerator.getMainMenu();
+            case '3':
+                return ResponseGenerator.getServiceMoreInfo(session.selectedService);
+            default:
+                return this.getInvalidOptionResponse("1️⃣, 2️⃣ o 3️⃣", "1️⃣ Sí, solicitar cotización\n2️⃣ Ver otro servicio\n3️⃣ Más información");
         }
     }
     
     // Steps del formulario de cotización
     handleQuoteNameStep(name, from) {
+        if (!name || name.trim().length < 2) {
+            return "Por favor, ingresa un nombre válido (mínimo 2 caracteres).";
+        }
+        
         sessionService.updateUserSession(from, { 
             step: 'quote_company',
             data: { name: name.trim() }
@@ -182,6 +189,10 @@ class WebhookController {
     }
     
     handleQuoteCompanyStep(company, from) {
+        if (!company || company.trim().length < 2) {
+            return "Por favor, ingresa un nombre de empresa válido (mínimo 2 caracteres).";
+        }
+        
         const session = sessionService.getUserSession(from);
         sessionService.updateUserSession(from, { 
             step: 'quote_email',
@@ -196,7 +207,7 @@ class WebhookController {
         if (quotationService.isValidEmail(email)) {
             sessionService.updateUserSession(from, { 
                 step: 'quote_phone',
-                data: { ...session.data, email: email.trim() }
+                data: { ...session.data, email: email.trim().toLowerCase() }
             });
             return "Excelente! 📱 ¿Cuál es tu número de teléfono?";
         } else {
@@ -205,6 +216,10 @@ class WebhookController {
     }
     
     handleQuotePhoneStep(phone, from) {
+        if (!phone || phone.trim().length < 8) {
+            return "Por favor, ingresa un número de teléfono válido (mínimo 8 dígitos).";
+        }
+        
         const session = sessionService.getUserSession(from);
         sessionService.updateUserSession(from, { 
             step: 'quote_description',
@@ -214,6 +229,10 @@ class WebhookController {
     }
     
     handleQuoteDescriptionStep(description, from) {
+        if (!description || description.trim().length < 10) {
+            return "Por favor, proporciona una descripción más detallada de tu proyecto (mínimo 10 caracteres).";
+        }
+        
         const session = sessionService.getUserSession(from);
         sessionService.updateUserSession(from, { 
             step: 'quote_summary',
@@ -258,8 +277,7 @@ class WebhookController {
             sessionService.updateUserSession(from, { step: 'quote_name' });
             return "Vamos a corregir los datos.\n\n👤 ¿Cuál es tu nombre?";
         } else {
-            return ResponseGenerator.getInvalidOptionMessage("1️⃣ o 2️⃣") + 
-                   "\n\n1️⃣ Sí, enviar cotización\n2️⃣ Modificar datos";
+            return this.getInvalidOptionResponse("1️⃣ o 2️⃣", "1️⃣ Sí, enviar cotización\n2️⃣ Modificar datos");
         }
     }
     
@@ -277,9 +295,14 @@ class WebhookController {
             sessionService.clearUserSession(from);
             return ResponseGenerator.getFarewellMessage();
         } else {
-            return ResponseGenerator.getInvalidOptionMessage("1️⃣ o 2️⃣") + 
-                   "\n\n1️⃣ Solicitar otra cotización\n2️⃣ Finalizar conversación";
+            return this.getInvalidOptionResponse("1️⃣ o 2️⃣", "1️⃣ Solicitar otra cotización\n2️⃣ Finalizar conversación");
         }
+    }
+    
+    // Método auxiliar para respuestas de opción inválida
+    getInvalidOptionResponse(validOptions, menuOptions) {
+        return ResponseGenerator.getInvalidOptionMessage(validOptions) + 
+               "\n\n" + menuOptions;
     }
 }
 

@@ -1,0 +1,28 @@
+<h1>👥 Sesiones Activas</h1>
+
+<div class="summary">
+    <strong>Total de sesiones activas: <%= sessionStats.totalSessions %></strong><br>
+    Sesiones con datos: <%= sessionStats.withData %> | 
+    Con servicio seleccionado: <%= sessionStats.withSelectedService %>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Teléfono</th>
+            <th>Estado Actual</th>
+            <th>Tiene Datos</th>
+            <th>Servicio Seleccionado</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% Object.entries(sessions).forEach(([phone, session]) => { %>
+            <tr>
+                <td><%= phone.replace('whatsapp:', '') %></td>
+                <td><span class="step"><%= session.step %></span></td>
+                <td><%= session.hasData ? '✅' : '❌' %></td>
+                <td><%= session.selectedService || 'N/A' %></td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>

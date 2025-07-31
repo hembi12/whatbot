@@ -1,0 +1,40 @@
+<h1>📋 Cotizaciones Recibidas</h1>
+
+<div class="summary">
+    <strong>Total de cotizaciones: <%= quotations.length %></strong>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Empresa</th>
+            <th>Email</th>
+            <th>Servicio</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% quotations.forEach(q => { %>
+            <% const date = new Date(q.created_at).toLocaleDateString('es-ES'); %>
+            <% const status = q.status || 'pending'; %>
+            <tr>
+                <td><strong>#<%= q.id %></strong></td>
+                <td><%= date %></td>
+                <td><%= q.client_name || 'N/A' %></td>
+                <td><%= q.company_name || 'N/A' %></td>
+                <td><%= q.email || 'N/A' %></td>
+                <td><%= q.service_name %></td>
+                <td><%= q.price_usd %></td>
+                <td><span class="status-badge <%= status %>"><%= status %></span></td>
+                <td>
+                    <a href="/admin/quotation/<%= q.id %>" style="color: #25D366;">Ver detalles</a>
+                </td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>

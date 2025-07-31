@@ -8,6 +8,10 @@ class EmailService {
         try {
             const service = servicesData.find(s => s.id === quotationData.serviceId);
             
+            if (!quotationData.email) {
+                throw new Error('Email del cliente no proporcionado');
+            }
+            
             const mailOptions = {
                 to: quotationData.email,
                 subject: `✅ Cotización Recibida #${quotationData.id} - ${process.env.COMPANY_NAME || 'Tu Empresa'}`,
@@ -55,6 +59,11 @@ class EmailService {
 
     // Template para el cliente
     generateClientTemplate(quotation, service) {
+        const companyName = process.env.COMPANY_NAME || 'Tu Empresa';
+        const companyWebsite = process.env.COMPANY_WEBSITE || 'www.tuempresa.com';
+        const emailFrom = process.env.EMAIL_FROM || 'contacto@tuempresa.com';
+        const currentDate = new Date().toLocaleDateString('es-ES');
+        
         return `
             <!DOCTYPE html>
             <html lang="es">
@@ -102,7 +111,7 @@ class EmailService {
                                 </tr>
                                 <tr>
                                     <td style="padding: 8px 0; color: #666; font-weight: bold;">💰 Precio:</td>
-                                    <td style="padding: 8px 0; color: #333; font-weight: bold; color: #25D366;">
+                                    <td style="padding: 8px 0; color: #25D366; font-weight: bold;">
                                         ${service?.priceUSD || 'No especificado'} / ${service?.priceMXN || 'No especificado'}
                                     </td>
                                 </tr>
@@ -112,7 +121,7 @@ class EmailService {
                                 </tr>
                                 <tr>
                                     <td style="padding: 8px 0; color: #666; font-weight: bold;">📅 Fecha:</td>
-                                    <td style="padding: 8px 0; color: #333;">${new Date().toLocaleDateString('es-ES')}</td>
+                                    <td style="padding: 8px 0; color: #333;">${currentDate}</td>
                                 </tr>
                             </table>
                         </div>
@@ -142,13 +151,13 @@ class EmailService {
                         <div style="text-align: center; margin: 30px 0;">
                             <h3 style="color: #333; margin-bottom: 15px;">¿Tienes preguntas?</h3>
                             <p style="color: #666; margin: 5px 0;">
-                                📧 Email: <a href="mailto:${process.env.EMAIL_FROM}" style="color: #25D366;">${process.env.EMAIL_FROM}</a>
+                                📧 Email: <a href="mailto:${emailFrom}" style="color: #25D366;">${emailFrom}</a>
                             </p>
                             <p style="color: #666; margin: 5px 0;">
                                 📱 WhatsApp: Responde a nuestro chat
                             </p>
                             <p style="color: #666; margin: 5px 0;">
-                                🌐 Web: <a href="https://tuempresa.com" style="color: #25D366;">www.tuempresa.com</a>
+                                🌐 Web: <a href="https://${companyWebsite}" style="color: #25D366;">${companyWebsite}</a>
                             </p>
                         </div>
                     </div>
@@ -156,7 +165,7 @@ class EmailService {
                     <!-- Footer -->
                     <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6;">
                         <p style="color: #666; font-size: 14px; margin: 0;">
-                            Gracias por confiar en <strong>${process.env.COMPANY_NAME || 'nosotros'}</strong> para tu proyecto web
+                            Gracias por confiar en <strong>${companyName}</strong> para tu proyecto web
                         </p>
                         <p style="color: #999; font-size: 12px; margin: 10px 0 0 0;">
                             Este email fue generado automáticamente por nuestro sistema de cotizaciones
@@ -170,6 +179,9 @@ class EmailService {
 
     // Template para el equipo
     generateTeamTemplate(quotation, service) {
+        const panelUrl = process.env.PANEL_URL || 'https://whatbot-production-2ef9.up.railway.app';
+        const currentDateTime = new Date().toLocaleString('es-ES');
+        
         return `
             <!DOCTYPE html>
             <html lang="es">
@@ -272,7 +284,7 @@ class EmailService {
                         
                         <!-- Panel Link -->
                         <div style="text-align: center; margin: 30px 0;">
-                            <a href="${process.env.PANEL_URL || 'https://whatbot-production-2ef9.up.railway.app'}/admin/quotation/${quotation.id}" 
+                            <a href="${panelUrl}/admin/quotation/${quotation.id}" 
                                style="display: inline-block; background: #dc3545; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
                                 👀 Ver en Panel de Admin
                             </a>
@@ -285,7 +297,7 @@ class EmailService {
                             💼 Sistema de Cotizaciones - Bot WhatsApp
                         </p>
                         <p style="color: #adb5bd; font-size: 12px; margin: 10px 0 0 0;">
-                            Cotización generada automáticamente el ${new Date().toLocaleString('es-ES')}
+                            Cotización generada automáticamente el ${currentDateTime}
                         </p>
                     </div>
                 </div>
@@ -301,6 +313,12 @@ class EmailService {
             team: null,
             errors: []
         };
+
+        // Validar datos mínimos requeridos
+        if (!quotationData || !quotationData.email) {
+            results.errors.push('Datos de cotización incompletos o email faltante');
+            return results;
+        }
 
         try {
             // Email al cliente
@@ -320,11 +338,24 @@ class EmailService {
             results.errors.push(`Error enviando notificación al equipo: ${error.message}`);
         }
 
+        // Log de resultados
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('📧 Resumen de envío de emails:', {
+                cliente: !!results.client,
+                equipo: !!results.team,
+                errores: results.errors.length
+            });
+        }
+
         return results;
     }
 
     // Método para pruebas
     async sendTestEmails(testEmail) {
+        if (!testEmail) {
+            throw new Error('Email de prueba requerido');
+        }
+
         const testQuotation = {
             id: 999,
             serviceId: 1,
@@ -333,10 +364,20 @@ class EmailService {
             email: testEmail,
             phone: '+52 55 1234 5678',
             phoneNumber: 'whatsapp:+525512345678',
-            description: 'Este es un proyecto de prueba para verificar que los emails funcionan correctamente.'
+            description: 'Este es un proyecto de prueba para verificar que los emails funcionan correctamente. Incluye detalles de ejemplo para mostrar cómo se verán los emails reales.'
         };
 
         return await this.sendQuotationEmails(testQuotation);
+    }
+
+    // Método auxiliar para obtener configuración
+    getEmailConfig() {
+        return {
+            isConfigured: emailConfig.getConfigInfo().isConfigured,
+            fromEmail: process.env.EMAIL_FROM,
+            teamEmail: process.env.EMAIL_TO_TEAM,
+            companyName: process.env.COMPANY_NAME || 'Tu Empresa'
+        };
     }
 }
 

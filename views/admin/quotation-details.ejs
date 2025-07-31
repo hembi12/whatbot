@@ -1,0 +1,52 @@
+<% const date = new Date(quotation.created_at).toLocaleString('es-ES'); %>
+
+<a href="/admin/quotations" class="back-btn">← Volver a Cotizaciones</a>
+
+<h1>📋 Cotización #<%= quotation.id %></h1>
+
+<div class="detail-grid">
+    <div class="detail-card">
+        <h3>👤 Cliente</h3>
+        <p><%= quotation.client_name || 'No especificado' %></p>
+    </div>
+    
+    <div class="detail-card">
+        <h3>🏢 Empresa</h3>
+        <p><%= quotation.company_name || 'No especificado' %></p>
+    </div>
+    
+    <div class="detail-card">
+        <h3>📧 Email</h3>
+        <p><%= quotation.email || 'No especificado' %></p>
+    </div>
+    
+    <div class="detail-card">
+        <h3>📱 Teléfono</h3>
+        <p><%= quotation.phone || 'No especificado' %></p>
+    </div>
+    
+    <div class="detail-card">
+        <h3>🛍️ Servicio</h3>
+        <p><%= quotation.service_name %></p>
+    </div>
+    
+    <div class="detail-card">
+        <h3>💰 Precio</h3>
+        <p><%= quotation.price_usd %> / <%= quotation.price_mxn %></p>
+    </div>
+    
+    <div class="detail-card">
+        <h3>⏱️ Tiempo Estimado</h3>
+        <p><%= quotation.estimated_time %></p>
+    </div>
+    
+    <div class="detail-card">
+        <h3>📅 Fecha</h3>
+        <p><%= date %></p>
+    </div>
+</div>
+
+<div class="description">
+    <h3>📝 Descripción del Proyecto</h3>
+    <p><%= quotation.description || 'No especificado' %></p>
+</div>
