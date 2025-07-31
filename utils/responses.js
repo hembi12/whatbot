@@ -5,7 +5,7 @@ class ResponseGenerator {
     
     // Mensaje de bienvenida
     static getWelcomeMessage() {
-        return "¡Hola! 👋 Soy el asistente de cotizaciones web.\n" +
+        return "¡Hola! 👋 Soy el asistente de Martil.dev\n" +
                "Te ayudo a encontrar el servicio perfecto para tu proyecto.\n\n" +
                "Escribe \"cotizar\" para empezar 🚀\n\n" +
                "También puedes usar:\n" +
@@ -63,9 +63,9 @@ class ResponseGenerator {
     // Información de contacto
     static getContactInfo() {
         return "📞 CONTACTO:\n\n" +
-               "📧 Email: info@tuempresa.com\n" +
+               "📧 Email: hectormartilb@gmail.com\n" +
                "📱 WhatsApp: Este chat\n" +
-               "🌐 Web: www.tuempresa.com\n\n" +
+               "🌐 Web: www.martil.dev/\n\n" +
                "Escribe \"cotizar\" para solicitar una cotización";
     }
 
